@@ -6,6 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Project/Scenes/MenuPrincipal.unity
+    guid: fd50a13408a3f4547be9606319568e22
+  - enabled: 1
+    path: Assets/Project/Scenes/Prologo.unity
+    guid: 3b51ec0a22f68184f9c9721bca33bfac
+  - enabled: 1
+    path: Assets/Project/Scenes/MapaMundial.unity
+    guid: 5eb1f002809b93b46b5610d25eabb2e7
+  - enabled: 1
     path: Assets/Project/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:

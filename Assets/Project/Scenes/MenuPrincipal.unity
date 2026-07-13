@@ -1198,9 +1198,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e920591cc60d914db34446824cfe500, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuPrincipalController
-  escenaContinuar: 
-  escenaNuevaPartida: 
-  escenaSeleccionarMision: 
+  escenaContinuar: MapaMundial
+  escenaNuevaPartida: Prologo
+  escenaSeleccionarMision: MapaMundial
   escenaArchivosFalla: 
   escenaOpciones: 
 --- !u!4 &1085420874

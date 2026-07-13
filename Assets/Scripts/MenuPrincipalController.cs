@@ -4,9 +4,9 @@ using UnityEngine.SceneManagement;
 public class MenuPrincipalController : MonoBehaviour
 {
     [Header("Escenas que se conectarán después")]
-    [SerializeField] private string escenaContinuar;
-    [SerializeField] private string escenaNuevaPartida;
-    [SerializeField] private string escenaSeleccionarMision;
+    [SerializeField] private string escenaContinuar = "MapaMundial";
+    [SerializeField] private string escenaNuevaPartida = "Prologo";
+    [SerializeField] private string escenaSeleccionarMision = "MapaMundial";
     [SerializeField] private string escenaArchivosFalla;
     [SerializeField] private string escenaOpciones;
 
