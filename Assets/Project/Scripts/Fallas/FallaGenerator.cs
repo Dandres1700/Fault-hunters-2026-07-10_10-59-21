@@ -24,6 +24,7 @@ public sealed class FallaGenerator : MonoBehaviour
     private bool spawningEnabled = true;
 
     public int CantidadActiva => active.Count;
+    public event System.Action<FallaCore> Generada;
 
     private void Awake()
     {
@@ -109,6 +110,7 @@ public sealed class FallaGenerator : MonoBehaviour
         spawned.Removida += OnSpawnRemoved;
         active.Add(spawned);
         particulasGeneracion?.Play(true);
+        Generada?.Invoke(spawned);
         return true;
     }
 
@@ -139,4 +141,3 @@ public sealed class FallaGenerator : MonoBehaviour
         spawningEnabled = false;
     }
 }
-

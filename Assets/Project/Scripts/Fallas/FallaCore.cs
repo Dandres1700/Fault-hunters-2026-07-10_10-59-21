@@ -181,7 +181,7 @@ public sealed class FallaCore : MonoBehaviour, IRecibeImpacto
         if (target != null)
         {
             IRecibeImpacto receiver = target.GetComponentInParent<IRecibeImpacto>();
-            if (receiver != null)
+            if (CombatTargeting.IsCazador(receiver))
             {
                 return;
             }
@@ -202,7 +202,7 @@ public sealed class FallaCore : MonoBehaviour, IRecibeImpacto
         {
             Collider candidate = detectionResults[index];
             detectionResults[index] = null;
-            if (candidate == null || candidate.GetComponentInParent<IRecibeImpacto>() == null)
+            if (!CombatTargeting.TryGetCazador(candidate, out _))
             {
                 continue;
             }

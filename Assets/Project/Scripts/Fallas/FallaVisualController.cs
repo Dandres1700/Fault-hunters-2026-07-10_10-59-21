@@ -9,9 +9,11 @@ public sealed class FallaVisualController : MonoBehaviour
 
     [SerializeField] private Transform visualRoot;
     [SerializeField] private Renderer[] renderers;
-    [SerializeField] private Color colorAlerta = new Color(0.7f, 0.08f, 1f, 1f);
+    [SerializeField] private Color colorAlerta = new Color(1f, 0.24f, 0.02f, 1f);
     [SerializeField] private Color colorImpacto = new Color(1f, 0.15f, 0.2f, 1f);
     [SerializeField, Min(0.02f)] private float duracionImpacto = 0.12f;
+    [Tooltip("Desactivar para modelos animados cuya silueta no debe deformarse.")]
+    [SerializeField] private bool animarFormaProcedural = true;
 
     private MaterialPropertyBlock block;
     private FallaConfiguration configuration;
@@ -49,7 +51,7 @@ public sealed class FallaVisualController : MonoBehaviour
 
     private void Update()
     {
-        if (configuration == null || visualRoot == null)
+        if (configuration == null || visualRoot == null || !animarFormaProcedural)
         {
             return;
         }

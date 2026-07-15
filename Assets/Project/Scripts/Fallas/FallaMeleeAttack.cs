@@ -102,8 +102,8 @@ public sealed class FallaMeleeAttack : MonoBehaviour, IFallaAttack
             {
                 continue;
             }
-            IRecibeImpacto receiver = candidate.GetComponentInParent<IRecibeImpacto>();
-            if (receiver == null || receiver.IdentidadImpacto == null ||
+            if (!CombatTargeting.TryGetCazador(candidate, out IRecibeImpacto receiver) ||
+                receiver.IdentidadImpacto == null ||
                 !hitIdentities.Add(receiver.IdentidadImpacto))
             {
                 continue;
@@ -124,4 +124,3 @@ public sealed class FallaMeleeAttack : MonoBehaviour, IFallaAttack
             radio);
     }
 }
-

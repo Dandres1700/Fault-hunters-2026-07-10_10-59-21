@@ -42,7 +42,10 @@ public sealed class CorruptionZone : MonoBehaviour
         {
             return;
         }
-        IRecibeImpacto receiver = other.GetComponentInParent<IRecibeImpacto>();
+        if (!CombatTargeting.TryGetCazador(other, out IRecibeImpacto receiver))
+        {
+            return;
+        }
         UnityEngine.Object identity = receiver?.IdentidadImpacto;
         if (receiver == null || identity == null ||
             (nextDamageTime.TryGetValue(identity, out float next) && Time.time < next))
@@ -56,8 +59,8 @@ public sealed class CorruptionZone : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        IRecibeImpacto receiver = other.GetComponentInParent<IRecibeImpacto>();
-        if (receiver?.IdentidadImpacto != null)
+        if (CombatTargeting.TryGetCazador(other, out IRecibeImpacto receiver) &&
+            receiver.IdentidadImpacto != null)
         {
             nextDamageTime.Remove(receiver.IdentidadImpacto);
         }

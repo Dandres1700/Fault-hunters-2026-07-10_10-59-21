@@ -18,7 +18,6 @@ public static class FallaSetupTool
         "Assets/Project/Scenes/FallaValidation.unity";
     private const string GenerationSessionKey = "CazadoresDeFallas.GeneratedThisSession.v4";
 
-    [InitializeOnLoadMethod]
     private static void ScheduleSafeGeneration()
     {
         if (SessionState.GetBool(GenerationSessionKey, false))
@@ -31,6 +30,11 @@ public static class FallaSetupTool
 
     [MenuItem("Tools/Cazadores de Fallas/Generar o reparar sistema de Fallas")]
     public static void GenerateMissingAssets()
+    {
+        RobotFallaSetupTool.GenerateOrRepair();
+    }
+
+    private static void GenerateLegacyAssets()
     {
         if (EditorApplication.isCompiling || EditorApplication.isUpdating)
         {

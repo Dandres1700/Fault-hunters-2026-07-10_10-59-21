@@ -10,7 +10,8 @@ public static class ConfigurarPersonajesMapa1Tool
     private const string MapScenePath = "Assets/Project/Scenes/MapaMundial.unity";
     private const string ScenesFolder = "Assets/Project/Scenes";
     private const string HunterPrefabPath = "Assets/Project/Prefabs/Player/Cazador.prefab";
-    private const string BossPrefabPath = "Assets/Project/Prefabs/Bosses/Mutant.prefab";
+    private const string BossPrefabPath =
+        "Assets/Project/Prefabs/Bosses/MutantConRobots.prefab";
 
     [MenuItem("Fault Hunters/Configurar personajes y luces del Mapa 1")]
     public static void ConfigureFromMenu()
@@ -269,8 +270,8 @@ public static class ConfigurarPersonajesMapa1Tool
                 Light light = lightObject.AddComponent<Light>();
                 light.type = LightType.Point;
                 light.color = new Color(1f, 0.48f, 0.2f, 1f);
-                light.intensity = 2.2f;
-                light.range = lightRange;
+                light.intensity = 3.6f;
+                light.range = lightRange * 1.35f;
                 light.shadows = LightShadows.None;
                 count++;
             }

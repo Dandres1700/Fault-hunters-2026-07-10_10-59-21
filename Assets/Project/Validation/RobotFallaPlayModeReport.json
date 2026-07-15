@@ -1,0 +1,21 @@
+{
+    "timestamp": "2026-07-15T11:12:18.8539845-05:00",
+    "completed": true,
+    "playerDamageIndependent": true,
+    "mutantDamageIndependent": true,
+    "playerDeathIndependent": true,
+    "mutantDeathIndependent": true,
+    "robotDamageIndependent": true,
+    "robotDeathIndependent": true,
+    "robotTargetsOnlyPlayer": true,
+    "mutantMovedTowardPlayer": true,
+    "mutantAttackStateObserved": true,
+    "mutantAttackedPlayer": true,
+    "minimumMutantDistance": 1.8264588117599488,
+    "crawlerAttackedPlayer": true,
+    "explosiveAttackedPlayer": true,
+    "generatorCreatedRobots": true,
+    "noPurpleBlobHierarchy": true,
+    "noMissingRuntimeReferences": true,
+    "notes": []
+}
