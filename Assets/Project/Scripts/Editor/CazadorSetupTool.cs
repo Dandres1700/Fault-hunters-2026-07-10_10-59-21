@@ -23,28 +23,35 @@ public static class CazadorSetupTool
 
     private readonly struct AnimationDefinition
     {
-        public AnimationDefinition(string name, bool loop)
+        public AnimationDefinition(string name, string fileName, bool loop)
         {
             Name = name;
+            FileName = fileName;
             Loop = loop;
         }
 
         public string Name { get; }
+        public string FileName { get; }
         public bool Loop { get; }
-        public string Path => $"Assets/Project/Art/Animations/{Name}.fbx";
+        public string Path => $"Assets/Project/Art/Animations/cazador/{FileName}.fbx";
     }
 
     private static readonly AnimationDefinition[] AnimationDefinitions =
     {
-        new AnimationDefinition("Idle", true),
-        new AnimationDefinition("Walk", true),
-        new AnimationDefinition("Run", true),
-        new AnimationDefinition("Jump", false),
-        new AnimationDefinition("Fall", true),
-        new AnimationDefinition("Land", false),
-        new AnimationDefinition("CrouchIdle", true),
-        new AnimationDefinition("CrouchWalk", true),
-        new AnimationDefinition("Attack", false)
+        new AnimationDefinition("Idle", "Idle", true),
+        new AnimationDefinition("Walk", "Walk", true),
+        new AnimationDefinition("Run", "Run", true),
+        new AnimationDefinition("Jump", "Jump", false),
+        new AnimationDefinition("Fall", "Fall", true),
+        new AnimationDefinition("Land", "Land", false),
+        new AnimationDefinition("CrouchIdle", "CrouchIdle", true),
+        new AnimationDefinition("CrouchWalk", "CrouchWalk", true),
+        new AnimationDefinition("Attack", "Attack", false),
+        new AnimationDefinition(
+            "Death",
+            "cazador@Sword And Shield Death",
+            false
+        )
     };
 
     [MenuItem("Tools/Fault Hunters/Configurar Cazador")]
@@ -97,7 +104,7 @@ public static class CazadorSetupTool
         }
 
         ConfigureAnimatorController(clips);
-        EnsurePrefabAnimatorConfiguration(avatar, clips["Attack"]);
+        EnsurePrefabAnimatorConfiguration(avatar, clips["Attack"], clips["Death"]);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         ValidarAnimacionesCazador();
@@ -253,9 +260,12 @@ public static class CazadorSetupTool
             );
         }
 
+        bool requiresOwnSourceAvatar = definition.Name == "Death";
         importer.animationType = ModelImporterAnimationType.Human;
-        importer.avatarSetup = ModelImporterAvatarSetup.CopyFromOther;
-        importer.sourceAvatar = avatar;
+        importer.avatarSetup = requiresOwnSourceAvatar
+            ? ModelImporterAvatarSetup.CreateFromThisModel
+            : ModelImporterAvatarSetup.CopyFromOther;
+        importer.sourceAvatar = requiresOwnSourceAvatar ? null : avatar;
 
         ModelImporterClipAnimation[] importedClips = importer.clipAnimations;
         if (importedClips == null || importedClips.Length == 0)
@@ -317,6 +327,7 @@ public static class CazadorSetupTool
         AnimatorState fall = GetOrCreateState(stateMachine, "Fall");
         AnimatorState land = GetOrCreateState(stateMachine, "Land");
         AnimatorState attack = GetOrCreateState(stateMachine, "Attack");
+        AnimatorState death = GetOrCreateState(stateMachine, "Death");
 
         BlendTree locomotionTree = GetOrCreateBlendTree(
             controller,
@@ -347,9 +358,15 @@ public static class CazadorSetupTool
         fall.motion = clips["Fall"];
         land.motion = clips["Land"];
         attack.motion = clips["Attack"];
+        death.motion = clips["Death"];
         stateMachine.defaultState = locomotion;
 
         ClearTransitions(stateMachine);
+
+        AnimatorStateTransition anyToDeath = stateMachine.AddAnyStateTransition(death);
+        ConfigureImmediateTransition(anyToDeath, 0.08f);
+        anyToDeath.canTransitionToSelf = false;
+        anyToDeath.AddCondition(AnimatorConditionMode.If, 0f, "IsDead");
 
         AddConditionTransition(
             locomotion,
@@ -506,7 +523,8 @@ public static class CazadorSetupTool
 
     private static void EnsurePrefabAnimatorConfiguration(
         Avatar avatar,
-        AnimationClip attackClip
+        AnimationClip attackClip,
+        AnimationClip deathClip
     )
     {
         GameObject prefabRoot = PrefabUtility.LoadPrefabContents(PrefabPath);
@@ -541,6 +559,16 @@ public static class CazadorSetupTool
                 }
             }
 
+            CazadorDeathController deathController =
+                prefabRoot.GetComponent<CazadorDeathController>();
+            if (deathController != null)
+            {
+                SerializedObject serializedDeath = new SerializedObject(deathController);
+                serializedDeath.FindProperty("tiempoVisible").floatValue =
+                    deathClip.length + 1f;
+                serializedDeath.ApplyModifiedPropertiesWithoutUndo();
+            }
+
             PrefabUtility.SaveAsPrefabAsset(prefabRoot, PrefabPath);
         }
         finally
@@ -559,7 +587,8 @@ public static class CazadorSetupTool
             "Jump",
             "Fall",
             "Land",
-            "Attack"
+            "Attack",
+            "Death"
         };
 
         foreach (string stateName in requiredStates)
@@ -629,6 +658,9 @@ public static class CazadorSetupTool
         EnsureParameter(controller, "Salto", AnimatorControllerParameterType.Trigger);
         EnsureParameter(controller, "Aterrizar", AnimatorControllerParameterType.Trigger);
         EnsureParameter(controller, "Ataque", AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, "Hit", AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, "Death", AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, "IsDead", AnimatorControllerParameterType.Bool);
 
         AnimatorStateMachine stateMachine = controller.layers[0].stateMachine;
         if (!stateMachine.states.Any(state => state.state.name == "Locomotion"))

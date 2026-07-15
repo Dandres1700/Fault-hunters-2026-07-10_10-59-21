@@ -15,6 +15,9 @@ public sealed class CazadorAnimationController : MonoBehaviour
     private static readonly int JumpHash = Animator.StringToHash("Salto");
     private static readonly int LandHash = Animator.StringToHash("Aterrizar");
     private static readonly int AttackHash = Animator.StringToHash("Ataque");
+    private static readonly int HitHash = Animator.StringToHash("Hit");
+    private static readonly int DeathHash = Animator.StringToHash("Death");
+    private static readonly int DeadHash = Animator.StringToHash("IsDead");
 
     [SerializeField] private Animator animator;
     [SerializeField] private CazadorController controller;
@@ -57,6 +60,7 @@ public sealed class CazadorAnimationController : MonoBehaviour
         SetBool(CrouchingHash, state.IsCrouching);
         SetBool(RunningHash, controller.EstaCorriendo);
         SetBool(DodgingHash, controller.EstaDasheando);
+        SetBool(DeadHash, state.IsDead);
     }
 
     public void NotifyJump()
@@ -75,6 +79,14 @@ public sealed class CazadorAnimationController : MonoBehaviour
             ? AttackHash
             : Animator.StringToHash(customTrigger);
         SetTrigger(triggerHash);
+    }
+
+    public void NotifyHit() => SetTrigger(HitHash);
+
+    public void NotifyDeath()
+    {
+        SetBool(DeadHash, true);
+        SetTrigger(DeathHash);
     }
 
     private void CacheParameters()

@@ -1,25 +1,6 @@
-using UnityEngine;
-
-[DisallowMultipleComponent]
-[RequireComponent(typeof(Collider))]
-public sealed class MutantHurtbox : MonoBehaviour, IRecibeDano
+/// <summary>
+/// Alias de compatibilidad. Los nuevos prefabs usan Hurtbox compartida.
+/// </summary>
+public sealed class MutantHurtbox : Hurtbox
 {
-    [SerializeField] private MutantStats receptor;
-
-    private void Awake()
-    {
-        receptor ??= GetComponentInParent<MutantStats>();
-        Collider hurtboxCollider = GetComponent<Collider>();
-        hurtboxCollider.isTrigger = true;
-
-        if (receptor == null)
-        {
-            Debug.LogError("MutantHurtbox no encontro MutantStats en sus padres.", this);
-        }
-    }
-
-    public void RecibirDano(float cantidad)
-    {
-        receptor?.RecibirDano(cantidad);
-    }
 }

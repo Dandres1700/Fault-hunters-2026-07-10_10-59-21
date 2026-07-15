@@ -6,6 +6,7 @@ public sealed class MutantAttackHitbox : MonoBehaviour
 {
     [SerializeField] private Transform origenAtaque;
     [SerializeField] private Transform raizPropietario;
+    [SerializeField] private Transform direccionReferencia;
     [SerializeField] private LayerMask capasGolpeables;
     [Tooltip("Radio mundial de la zona activa.")]
     [SerializeField, Min(0.01f)] private float radio = 1.45f;
@@ -13,8 +14,8 @@ public sealed class MutantAttackHitbox : MonoBehaviour
     [SerializeField, Min(0f)] private float desplazamientoFrontal = 1.8f;
     [SerializeField, Range(4, 64)] private int capacidadDeteccion = 32;
 
-    private readonly HashSet<IRecibeDano> objetivosGolpeados =
-        new HashSet<IRecibeDano>();
+    private readonly HashSet<UnityEngine.Object> objetivosGolpeados =
+        new HashSet<UnityEngine.Object>();
     private Collider[] resultados;
     private float danoActual;
     private bool activa;
@@ -25,6 +26,7 @@ public sealed class MutantAttackHitbox : MonoBehaviour
     {
         origenAtaque ??= transform;
         raizPropietario ??= transform.root;
+        direccionReferencia ??= raizPropietario;
         resultados = new Collider[Mathf.Max(4, capacidadDeteccion)];
     }
 
@@ -73,13 +75,30 @@ public sealed class MutantAttackHitbox : MonoBehaviour
                 continue;
             }
 
-            IRecibeDano damageable = candidate.GetComponentInParent<IRecibeDano>();
-            if (damageable == null || !objetivosGolpeados.Add(damageable))
+            IRecibeImpacto impactReceiver = candidate.GetComponentInParent<IRecibeImpacto>();
+            if (impactReceiver != null)
             {
+                UnityEngine.Object identity = impactReceiver.IdentidadImpacto;
+                if (identity == null || !objetivosGolpeados.Add(identity))
+                {
+                    continue;
+                }
+
+                Vector3 point = candidate.ClosestPoint(GetAttackCenter());
+                Vector3 direction = candidate.bounds.center - raizPropietario.position;
+                impactReceiver.RecibirImpacto(
+                    new DamageInfo(danoActual, point, direction, raizPropietario.gameObject)
+                );
                 continue;
             }
 
-            damageable.RecibirDano(danoActual);
+            IRecibeDano damageable = candidate.GetComponentInParent<IRecibeDano>();
+            UnityEngine.Object fallbackIdentity = damageable as UnityEngine.Object;
+            if (damageable != null && fallbackIdentity != null &&
+                objetivosGolpeados.Add(fallbackIdentity))
+            {
+                damageable.RecibirDano(danoActual);
+            }
         }
     }
 
@@ -89,8 +108,13 @@ public sealed class MutantAttackHitbox : MonoBehaviour
                (candidate == raizPropietario || candidate.IsChildOf(raizPropietario));
     }
 
-    private Vector3 GetAttackCenter() =>
-        origenAtaque.position + origenAtaque.forward * desplazamientoFrontal;
+    private Vector3 GetAttackCenter()
+    {
+        Vector3 forward = direccionReferencia != null
+            ? direccionReferencia.forward
+            : origenAtaque.forward;
+        return origenAtaque.position + forward * desplazamientoFrontal;
+    }
 
     private void OnDisable()
     {
@@ -102,9 +126,7 @@ public sealed class MutantAttackHitbox : MonoBehaviour
     {
         Transform origin = origenAtaque != null ? origenAtaque : transform;
         Gizmos.color = activa ? Color.red : new Color(1f, 0.25f, 0f);
-        Gizmos.DrawWireSphere(
-            origin.position + origin.forward * desplazamientoFrontal,
-            radio
-        );
+        Transform direction = direccionReferencia != null ? direccionReferencia : origin;
+        Gizmos.DrawWireSphere(origin.position + direction.forward * desplazamientoFrontal, radio);
     }
 }

@@ -11,6 +11,9 @@ public sealed class MutantAnimationController : MonoBehaviour
     private static readonly int JumpHash = Animator.StringToHash("Jump");
     private static readonly int LandHash = Animator.StringToHash("Land");
     private static readonly int AttackHash = Animator.StringToHash("Attack");
+    private static readonly int HitHash = Animator.StringToHash("Hit");
+    private static readonly int DeathHash = Animator.StringToHash("Death");
+    private static readonly int DeadHash = Animator.StringToHash("IsDead");
 
     [SerializeField] private Animator animator;
     [SerializeField] private MutantMotor motor;
@@ -43,11 +46,19 @@ public sealed class MutantAnimationController : MonoBehaviour
         SetFloat(VerticalVelocityHash, motor.VelocidadVertical, damping);
         SetBool(GroundedHash, state.IsGrounded);
         SetBool(CrouchingHash, state.IsCrouching);
+        SetBool(DeadHash, state.IsDead);
     }
 
     public void NotifyJump() => SetTrigger(JumpHash);
     public void NotifyLanding() => SetTrigger(LandHash);
     public void NotifyAttack() => SetTrigger(AttackHash);
+    public void NotifyHit() => SetTrigger(HitHash);
+
+    public void NotifyDeath()
+    {
+        SetBool(DeadHash, true);
+        SetTrigger(DeathHash);
+    }
 
     private void CacheParameters()
     {

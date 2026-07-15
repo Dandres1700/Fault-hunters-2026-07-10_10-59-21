@@ -6,7 +6,7 @@ using UnityEngine;
 /// Otros sistemas (UI, combate, controller) se suscriben a los eventos
 /// en lugar de leer los valores directamente cada frame.
 /// </summary>
-public class CazadorStats : MonoBehaviour, IRecibeDano
+public class CazadorStats : MonoBehaviour, IRecibeImpacto
 {
     [Header("Vida")]
     [SerializeField] private float vidaMaxima = 100f;
@@ -23,23 +23,30 @@ public class CazadorStats : MonoBehaviour, IRecibeDano
     [SerializeField] private float duracionInvulnerabilidadAlRecibirDano = 0.5f;
     private float timerInvulnerabilidad;
 
+    [Header("Efectos")]
+    [SerializeField] private DamageEffects efectosDano;
+    private bool muerteNotificada;
+
     public bool EstaVivo => vidaActual > 0f;
     public bool EsInvulnerable => timerInvulnerabilidad > 0f;
     public float VidaActual => vidaActual;
     public float VidaMaxima => vidaMaxima;
     public float StaminaActual => staminaActual;
     public float StaminaMaxima => staminaMaxima;
+    public UnityEngine.Object IdentidadImpacto => this;
 
     // Eventos para UI y otros sistemas
     public event Action<float, float> OnVidaCambiada;       // (actual, maxima)
     public event Action<float, float> OnStaminaCambiada;    // (actual, maxima)
     public event Action OnMuerte;
     public event Action<float> OnDanoRecibido;               // cantidad de dano
+    public event Action<DamageInfo> OnImpactoRecibido;
 
     private void Awake()
     {
         vidaActual = vidaMaxima;
         staminaActual = staminaMaxima;
+        efectosDano ??= GetComponent<DamageEffects>();
     }
 
     private void Update()
@@ -71,18 +78,31 @@ public class CazadorStats : MonoBehaviour, IRecibeDano
 
     public void RecibirDano(float cantidad)
     {
-        if (!EstaVivo || EsInvulnerable) return;
+        RecibirImpacto(new DamageInfo(cantidad, transform.position, Vector3.zero, null));
+    }
 
-        vidaActual = Mathf.Max(0f, vidaActual - cantidad);
+    public bool RecibirImpacto(DamageInfo impacto)
+    {
+        if (!EstaVivo || EsInvulnerable || impacto.Cantidad <= 0f)
+        {
+            return false;
+        }
+
+        vidaActual = Mathf.Max(0f, vidaActual - impacto.Cantidad);
         timerInvulnerabilidad = duracionInvulnerabilidadAlRecibirDano;
 
-        OnDanoRecibido?.Invoke(cantidad);
+        efectosDano?.Reproducir(impacto);
+        OnDanoRecibido?.Invoke(impacto.Cantidad);
+        OnImpactoRecibido?.Invoke(impacto);
         OnVidaCambiada?.Invoke(vidaActual, vidaMaxima);
 
-        if (vidaActual <= 0f)
+        if (vidaActual <= 0f && !muerteNotificada)
         {
+            muerteNotificada = true;
             OnMuerte?.Invoke();
         }
+
+        return true;
     }
 
     public void Curar(float cantidad)
@@ -111,6 +131,7 @@ public class CazadorStats : MonoBehaviour, IRecibeDano
         vidaActual = vidaMaxima;
         staminaActual = staminaMaxima;
         timerInvulnerabilidad = 0f;
+        muerteNotificada = false;
         OnVidaCambiada?.Invoke(vidaActual, vidaMaxima);
         OnStaminaCambiada?.Invoke(staminaActual, staminaMaxima);
     }

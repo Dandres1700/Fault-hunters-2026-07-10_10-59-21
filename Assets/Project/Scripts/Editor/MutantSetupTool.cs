@@ -46,6 +46,7 @@ public static class MutantSetupTool
         new MutantClipDefinition("CrouchIdle", "Mutant@CrouchIdle", true, true),
         new MutantClipDefinition("CrouchWalk", "Mutant@CrouchWalk", true, true),
         new MutantClipDefinition("Attack", "Mutant@Mutant Swiping", false, true),
+        new MutantClipDefinition("Death", "Mutant@Mutant Dying", false, true),
         new MutantClipDefinition("JumpAttack", "Mutant@Jump Attack", false, false),
         new MutantClipDefinition(
             "StealthAssassination",
@@ -90,8 +91,12 @@ public static class MutantSetupTool
             throw new InvalidOperationException("No existe Mutant.controller.");
         }
 
+        EnsureParameter(controller, "Hit", AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, "Death", AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, "IsDead", AnimatorControllerParameterType.Bool);
+
         ReplaceControllerMotions(controller);
-        SyncAttackDuration();
+        SyncCombatDurations();
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         ValidateMutant();
@@ -118,7 +123,7 @@ public static class MutantSetupTool
         string[] requiredParameters =
         {
             "Speed", "IsGrounded", "IsCrouching", "VerticalVelocity",
-            "Jump", "Land", "Attack"
+            "Jump", "Land", "Attack", "Hit", "Death", "IsDead"
         };
         foreach (string parameter in requiredParameters)
         {
@@ -131,7 +136,7 @@ public static class MutantSetupTool
         AnimatorStateMachine machine = controller.layers[0].stateMachine;
         string[] requiredStates =
         {
-            "Locomotion", "Crouch Locomotion", "Jump", "Fall", "Land", "Attack"
+            "Locomotion", "Crouch Locomotion", "Jump", "Fall", "Land", "Attack", "Death"
         };
         foreach (string stateName in requiredStates)
         {
@@ -172,9 +177,13 @@ public static class MutantSetupTool
         CharacterController character = prefab.GetComponent<CharacterController>();
         PlayerInput playerInput = prefab.GetComponent<PlayerInput>();
         Animator animator = prefab.GetComponentInChildren<Animator>(true);
-        CapsuleCollider hurtbox = prefab.transform.Find("Hurtbox")?
-            .GetComponent<CapsuleCollider>();
-        if (character == null || playerInput == null || animator == null || hurtbox == null)
+        Transform hurtboxes = prefab.transform.Find("Hurtboxes");
+        Collider legacyHurtbox = prefab.transform.Find("Hurtbox")?
+            .GetComponent<Collider>();
+        bool hasDamageCoverage = legacyHurtbox != null ||
+                                 (hurtboxes != null && hurtboxes.childCount > 0);
+        if (character == null || playerInput == null || animator == null ||
+            !hasDamageCoverage)
         {
             throw new InvalidOperationException("Faltan componentes fisicos o de entrada.");
         }
@@ -386,6 +395,9 @@ public static class MutantSetupTool
         AnimatorState fall = FindState(machine, "Fall");
         AnimatorState land = FindState(machine, "Land");
         AnimatorState attack = FindState(machine, "Attack");
+        AnimatorState death = machine.states
+            .Select(item => item.state)
+            .FirstOrDefault(item => item.name == "Death") ?? machine.AddState("Death");
 
         if (locomotion.motion is not BlendTree locomotionTree ||
             locomotionTree.children.Length != 3)
@@ -415,6 +427,23 @@ public static class MutantSetupTool
         fall.motion = LoadRequiredClip("Fall");
         land.motion = LoadRequiredClip("Land");
         attack.motion = LoadRequiredClip("Attack");
+        death.motion = LoadRequiredClip("Death");
+
+        foreach (AnimatorStateTransition transition in death.transitions.ToArray())
+        {
+            death.RemoveTransition(transition);
+        }
+
+        bool hasDeathTransition = machine.anyStateTransitions.Any(transition =>
+            transition.destinationState == death);
+        if (!hasDeathTransition)
+        {
+            AnimatorStateTransition transition = machine.AddAnyStateTransition(death);
+            transition.hasExitTime = false;
+            transition.duration = 0.08f;
+            transition.canTransitionToSelf = false;
+            transition.AddCondition(AnimatorConditionMode.If, 0f, "IsDead");
+        }
 
         foreach (AnimatorStateTransition transition in machine.anyStateTransitions)
         {
@@ -429,7 +458,7 @@ public static class MutantSetupTool
         EditorUtility.SetDirty(controller);
     }
 
-    private static void SyncAttackDuration()
+    private static void SyncCombatDurations()
     {
         AnimationClip attackClip = LoadRequiredClip("Attack");
         GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
@@ -444,6 +473,15 @@ public static class MutantSetupTool
             SerializedObject serialized = new SerializedObject(combat);
             serialized.FindProperty("duracionAtaque").floatValue = attackClip.length;
             serialized.ApplyModifiedPropertiesWithoutUndo();
+
+            MutantDeathController deathController = root.GetComponent<MutantDeathController>();
+            if (deathController != null)
+            {
+                SerializedObject deathSerialized = new SerializedObject(deathController);
+                deathSerialized.FindProperty("tiempoVisible").floatValue =
+                    LoadRequiredClip("Death").length + 1f;
+                deathSerialized.ApplyModifiedPropertiesWithoutUndo();
+            }
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
         }
         finally
@@ -491,6 +529,7 @@ public static class MutantSetupTool
         AssertMotion(FindState(machine, "Fall").motion, "Fall");
         AssertMotion(FindState(machine, "Land").motion, "Land");
         AssertMotion(FindState(machine, "Attack").motion, "Attack");
+        AssertMotion(FindState(machine, "Death").motion, "Death");
     }
 
     private static AnimatorState FindState(AnimatorStateMachine machine, string name)
@@ -538,6 +577,9 @@ public static class MutantSetupTool
         EnsureParameter(controller, "Jump", AnimatorControllerParameterType.Trigger);
         EnsureParameter(controller, "Land", AnimatorControllerParameterType.Trigger);
         EnsureParameter(controller, "Attack", AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, "Hit", AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, "Death", AnimatorControllerParameterType.Trigger);
+        EnsureParameter(controller, "IsDead", AnimatorControllerParameterType.Bool);
 
         AnimatorStateMachine machine = controller.layers[0].stateMachine;
         ClearStateMachine(machine);
@@ -572,6 +614,7 @@ public static class MutantSetupTool
         AnimatorState fall = machine.AddState("Fall", new Vector3(720f, -100f));
         AnimatorState land = machine.AddState("Land", new Vector3(720f, 20f));
         AnimatorState attack = machine.AddState("Attack", new Vector3(500f, 220f));
+        AnimatorState death = machine.AddState("Death", new Vector3(920f, 220f));
         machine.defaultState = locomotion;
 
         locomotion.motion = locomotionTree;
@@ -580,6 +623,7 @@ public static class MutantSetupTool
         fall.motion = LoadClip("Fall");
         land.motion = LoadClip("Land");
         attack.motion = LoadClip("Attack");
+        death.motion = LoadClip("Death");
 
         AddConditionTransition(
             locomotion, crouch, AnimatorConditionMode.If, 0f, "IsCrouching", 0.12f
@@ -595,6 +639,12 @@ public static class MutantSetupTool
         );
         AddExitTransition(land, locomotion, 0.88f, 0.08f);
         AddExitTransition(attack, locomotion, 0.94f, 0.1f);
+
+        AnimatorStateTransition deathTransition = machine.AddAnyStateTransition(death);
+        deathTransition.hasExitTime = false;
+        deathTransition.duration = 0.08f;
+        deathTransition.canTransitionToSelf = false;
+        deathTransition.AddCondition(AnimatorConditionMode.If, 0f, "IsDead");
 
         AddAnyStateTrigger(machine, jump, "Jump", 0.06f);
         AddAnyStateTrigger(machine, land, "Land", 0.06f);
