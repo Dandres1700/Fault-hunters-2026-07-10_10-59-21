@@ -269,8 +269,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d892fb3e38aba3c4fad0d1f827cb73a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CazadorCameraController
-  target: {fileID: 1656717301}
-  input: {fileID: 1656717300}
+  target: {fileID: 0}
+  input: {fileID: 0}
   distancia: 4.5
   sensibilidadRaton: 0.12
   sensibilidadMando: 150
@@ -459,136 +459,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1656717299
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -1.45
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.55
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542858336023407854, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5303648399451888183, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-      propertyPath: m_Name
-      value: Cazador
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
---- !u!114 &1656717300 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4504208118744099496, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-  m_PrefabInstance: {fileID: 1656717299}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0168eda550ce695478fc84bd7feb28cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CazadorInputReader
---- !u!4 &1656717301 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 851146108872723896, guid: b2a759a78227bcd4087ed93221540b0a, type: 3}
-  m_PrefabInstance: {fileID: 1656717299}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &1827745445
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.65
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.55
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2108740800004437012, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
-      propertyPath: m_Name
-      value: Mutant
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
 --- !u!1 &1994340610
 GameObject:
   m_ObjectHideFlags: 0
@@ -710,5 +580,3 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 1994340614}
-  - {fileID: 1656717299}
-  - {fileID: 1827745445}
