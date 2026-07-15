@@ -107,33 +107,23 @@ public static class ConfigurarMapa1Tool
     private static void PrepareCity(GameObject city)
     {
         city.name = "Mapa1_CiudadAbandonada";
-        city.transform.position = Vector3.zero;
-        city.transform.localScale = Vector3.one;
-
-        Bounds unitBounds = CalculateBounds(city);
-        float largestSide = Mathf.Max(unitBounds.size.x, unitBounds.size.z);
-
-        if (!IsFinite(largestSide) || largestSide <= 0.001f)
-        {
-            throw new InvalidOperationException("La escala original de la ciudad no es valida.");
-        }
-
-        city.transform.localScale = Vector3.one * (TargetMapSize / largestSide);
 
         Bounds initialBounds = CalculateBounds(city);
+        float largestSide = Mathf.Max(initialBounds.size.x, initialBounds.size.z);
+
+        if (largestSide > 500f || largestSide < 40f)
+        {
+            float scaleFactor = TargetMapSize / largestSide;
+            city.transform.localScale *= scaleFactor;
+            initialBounds = CalculateBounds(city);
+        }
 
         Vector3 offset = new Vector3(
             -initialBounds.center.x,
             -initialBounds.min.y,
             -initialBounds.center.z
         );
-
-        if (!IsFinite(offset))
-        {
-            throw new InvalidOperationException("No se pudo calcular una posicion valida para la ciudad.");
-        }
-
-        city.transform.position = offset;
+        city.transform.position += offset;
 
         MeshCollider rootCollider = city.GetComponent<MeshCollider>();
 
@@ -176,45 +166,14 @@ public static class ConfigurarMapa1Tool
             throw new InvalidOperationException("La ciudad no contiene mallas visibles.");
         }
 
-        Bounds bounds = default;
-        bool foundValidBounds = false;
+        Bounds bounds = renderers[0].bounds;
 
-        foreach (Renderer renderer in renderers)
+        for (int i = 1; i < renderers.Length; i++)
         {
-            Bounds rendererBounds = renderer.bounds;
-
-            if (!IsFinite(rendererBounds.center) || !IsFinite(rendererBounds.size))
-            {
-                continue;
-            }
-
-            if (!foundValidBounds)
-            {
-                bounds = rendererBounds;
-                foundValidBounds = true;
-            }
-            else
-            {
-                bounds.Encapsulate(rendererBounds);
-            }
-        }
-
-        if (!foundValidBounds)
-        {
-            throw new InvalidOperationException("La ciudad no contiene limites validos.");
+            bounds.Encapsulate(renderers[i].bounds);
         }
 
         return bounds;
-    }
-
-    private static bool IsFinite(Vector3 value)
-    {
-        return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
-    }
-
-    private static bool IsFinite(float value)
-    {
-        return !float.IsNaN(value) && !float.IsInfinity(value);
     }
 
     private static void CreateFloor(Transform parent, Bounds bounds)

@@ -17,6 +17,7 @@ public class MenuPrincipalController : MonoBehaviour
 
     public void NuevaPartida()
     {
+        GameProgress.ResetProgress();
         CargarEscena(escenaNuevaPartida, "Nueva partida");
     }
 
