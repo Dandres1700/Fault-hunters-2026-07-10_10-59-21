@@ -1,0 +1,259 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &312408349075528635
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3013433591345741180}
+  m_Layer: 0
+  m_Name: FallaSpawn_B
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3013433591345741180
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 312408349075528635}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3, y: 0, z: 1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 282912999291727661}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &375792223927457943
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5122043759249796522}
+  m_Layer: 0
+  m_Name: FallaSpawn_C
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5122043759249796522
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375792223927457943}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 282912999291727661}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3645984712496629679
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 282912999291727661}
+  m_Layer: 0
+  m_Name: FallaSpawnPoints
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &282912999291727661
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3645984712496629679}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1975318496116674355}
+  - {fileID: 3013433591345741180}
+  - {fileID: 5122043759249796522}
+  m_Father: {fileID: 9222071521360536006}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4783707717589103502
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1975318496116674355}
+  m_Layer: 0
+  m_Name: FallaSpawn_A
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1975318496116674355
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4783707717589103502}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3, y: 0, z: 1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 282912999291727661}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &8626054358338617533
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2108740800004437012, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      propertyPath: m_Name
+      value: MutantConFallas
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 282912999291727661}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2108740800004437012, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9177781471153420372}
+  m_SourcePrefab: {fileID: 100100000, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+--- !u!1 &7707389772818871465 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2108740800004437012, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+  m_PrefabInstance: {fileID: 8626054358338617533}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9177781471153420372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7707389772818871465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4f1b495fe740bf4c8058fcaf43e7a1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MutantFallaController
+  invocacionAutomatica: 1
+  objetivo: {fileID: 0}
+  puntosAparicion:
+  - {fileID: 1975318496116674355}
+  - {fileID: 3013433591345741180}
+  - {fileID: 5122043759249796522}
+  fases:
+  - umbralVida: 1
+    maximoActivas: 2
+    intervaloInvocacion: 9
+    multiplicadorPoder: 1
+    prefabsPermitidos:
+    - {fileID: 5090889701004101228, guid: c76c0c6878bebd74bad5ff241cebbe6c, type: 3}
+  - umbralVida: 0.7
+    maximoActivas: 3
+    intervaloInvocacion: 7
+    multiplicadorPoder: 1.1
+    prefabsPermitidos:
+    - {fileID: 5090889701004101228, guid: c76c0c6878bebd74bad5ff241cebbe6c, type: 3}
+    - {fileID: 1114156091654048961, guid: 1d245cbba2c29c54cabfef829fa059d4, type: 3}
+  - umbralVida: 0.4
+    maximoActivas: 4
+    intervaloInvocacion: 6
+    multiplicadorPoder: 1.2
+    prefabsPermitidos:
+    - {fileID: 5090889701004101228, guid: c76c0c6878bebd74bad5ff241cebbe6c, type: 3}
+    - {fileID: 1114156091654048961, guid: 1d245cbba2c29c54cabfef829fa059d4, type: 3}
+    - {fileID: 6637218675043220785, guid: 7b3d1c56c2dd27048b0e93fd9b9ce37a, type: 3}
+  - umbralVida: 0.18
+    maximoActivas: 5
+    intervaloInvocacion: 5
+    multiplicadorPoder: 1.35
+    prefabsPermitidos:
+    - {fileID: 5090889701004101228, guid: c76c0c6878bebd74bad5ff241cebbe6c, type: 3}
+    - {fileID: 1114156091654048961, guid: 1d245cbba2c29c54cabfef829fa059d4, type: 3}
+  radioAparicion: 2
+  radioLibre: 0.7
+  distanciaMinimaObjetivo: 3
+  intentosPosicion: 10
+  capasSuelo:
+    serializedVersion: 2
+    m_Bits: 512
+  capasBloqueo:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!4 &9222071521360536006 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 598564837228487035, guid: f95b131d17ba5584487bdb6d81fe80f9, type: 3}
+  m_PrefabInstance: {fileID: 8626054358338617533}
+  m_PrefabAsset: {fileID: 0}
