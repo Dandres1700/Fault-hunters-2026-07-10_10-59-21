@@ -1,59 +1,115 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Collider (Trigger) que representa el "arma" del Cazador durante un ataque.
-/// Se activa/desactiva desde CazadorCombat en frames especificos de la animacion.
-/// Colocar en un GameObject hijo (ej. en la mano o el arma) con un Collider
-/// marcado como "Is Trigger".
-/// </summary>
-[RequireComponent(typeof(Collider))]
-public class HitboxAtaque : MonoBehaviour
+[DisallowMultipleComponent]
+public sealed class HitboxAtaque : MonoBehaviour
 {
-    [SerializeField] private LayerMask capasGolpeables; // ej. layer "Boss" / "Enemigo"
+    [SerializeField] private Transform origenAtaque;
+    [SerializeField] private Transform raizPropietario;
+    [SerializeField] private LayerMask capasGolpeables;
+    [SerializeField, Min(0.01f)] private float radio = 0.45f;
+    [SerializeField, Min(0f)] private float desplazamientoFrontal = 0.65f;
+    [SerializeField, Range(4, 64)] private int capacidadDeteccion = 24;
 
-    private Collider hitCollider;
+    private readonly HashSet<IRecibeDano> objetivosGolpeados =
+        new HashSet<IRecibeDano>();
+    private Collider[] resultados;
     private float danoActual;
-    private HashSet<Collider> objetivosYaGolpeados = new HashSet<Collider>();
+    private bool activa;
+
+    public bool EstaActiva => activa;
 
     private void Awake()
     {
-        hitCollider = GetComponent<Collider>();
-        hitCollider.isTrigger = true;
-        hitCollider.enabled = false;
+        origenAtaque ??= transform;
+        raizPropietario ??= transform.root;
+        resultados = new Collider[Mathf.Max(4, capacidadDeteccion)];
+    }
+
+    private void Update()
+    {
+        if (activa)
+        {
+            DetectarImpactos();
+        }
     }
 
     public void Activar(float dano)
     {
-        danoActual = dano;
-        objetivosYaGolpeados.Clear();
-        hitCollider.enabled = true;
+        danoActual = Mathf.Max(0f, dano);
+        objetivosGolpeados.Clear();
+        activa = true;
+        DetectarImpactos();
     }
 
     public void Desactivar()
     {
-        hitCollider.enabled = false;
+        activa = false;
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void DetectarImpactos()
     {
-        if (((1 << other.gameObject.layer) & capasGolpeables) == 0) return;
-        if (objetivosYaGolpeados.Contains(other)) return;
+        if (resultados == null || origenAtaque == null)
+        {
+            return;
+        }
 
-        objetivosYaGolpeados.Add(other);
+        Vector3 center = GetAttackCenter();
+        int count = Physics.OverlapSphereNonAlloc(
+            center,
+            radio,
+            resultados,
+            capasGolpeables,
+            QueryTriggerInteraction.Collide
+        );
 
-        // El boss debe exponer un metodo de recibir dano, por ejemplo:
-        // FallaBoss falla = other.GetComponent<FallaBoss>();
-        // falla?.RecibirDano(danoActual);
-        var recibidorDano = other.GetComponent<IRecibeDano>();
-        recibidorDano?.RecibirDano(danoActual);
+        for (int index = 0; index < count; index++)
+        {
+            Collider candidate = resultados[index];
+            resultados[index] = null;
+            if (candidate == null || IsOwnedByPlayer(candidate.transform))
+            {
+                continue;
+            }
+
+            IRecibeDano damageable = candidate.GetComponentInParent<IRecibeDano>();
+            if (damageable == null || !objetivosGolpeados.Add(damageable))
+            {
+                continue;
+            }
+
+            damageable.RecibirDano(danoActual);
+        }
+    }
+
+    private bool IsOwnedByPlayer(Transform candidate)
+    {
+        return raizPropietario != null &&
+               (candidate == raizPropietario || candidate.IsChildOf(raizPropietario));
+    }
+
+    private Vector3 GetAttackCenter()
+    {
+        return origenAtaque.position + origenAtaque.forward * desplazamientoFrontal;
+    }
+
+    private void OnDisable()
+    {
+        activa = false;
+        objetivosGolpeados.Clear();
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Transform origin = origenAtaque != null ? origenAtaque : transform;
+        Gizmos.color = activa ? Color.red : new Color(1f, 0.55f, 0f);
+        Gizmos.DrawWireSphere(
+            origin.position + origin.forward * desplazamientoFrontal,
+            radio
+        );
     }
 }
 
-/// <summary>
-/// Interfaz comun para cualquier cosa que pueda recibir dano
-/// (bosses, obstaculos destructibles, etc). FallaBoss la va a implementar.
-/// </summary>
 public interface IRecibeDano
 {
     void RecibirDano(float cantidad);
