@@ -208,7 +208,7 @@ MonoBehaviour:
     m_Bits: 256
   capasObstaculo:
     serializedVersion: 2
-    m_Bits: 4294966015
+    m_Bits: 567
   objetivoInicial: {fileID: 0}
   visualRoot: {fileID: 5014859856351303322}
   nucleo: {fileID: 0}
