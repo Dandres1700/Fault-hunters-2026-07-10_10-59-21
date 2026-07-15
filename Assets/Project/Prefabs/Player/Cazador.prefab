@@ -195,6 +195,7 @@ GameObject:
   - component: {fileID: 7975791522597786374}
   - component: {fileID: 8502508494982468558}
   - component: {fileID: 3624343158318917056}
+  - component: {fileID: 9123456789012345678}
   m_Layer: 8
   m_Name: Cazador
   m_TagString: Untagged
@@ -421,6 +422,18 @@ MonoBehaviour:
   particulasImpacto: {fileID: 0}
   sonidoImpacto: {fileID: 0}
   volumenImpacto: 1
+--- !u!114 &9123456789012345678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5303648399451888183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 665c541ae1927f3459b7d40255e4b61c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::CazadorCameraBootstrap
 --- !u!114 &3624343158318917056
 MonoBehaviour:
   m_ObjectHideFlags: 0

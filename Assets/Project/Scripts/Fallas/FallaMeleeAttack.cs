@@ -113,6 +113,26 @@ public sealed class FallaMeleeAttack : MonoBehaviour, IFallaAttack
             receiver.RecibirImpacto(
                 new DamageInfo(owner.DanoActual, point, direction, owner.gameObject));
         }
+
+        // El robot puede tener su malla/attackOrigin desplazados por la escala
+        // de la ciudad. Si ya alcanzo a su objetivo, el golpe no debe perderse
+        // porque OverlapSphere no encontro el collider hijo del Cazador.
+        if (hitIdentities.Count == 0 && target != null && owner != null)
+        {
+            CazadorStats hunter = target.GetComponentInParent<CazadorStats>();
+            if (hunter != null)
+            {
+                Vector3 separation = hunter.transform.position - owner.transform.position;
+                separation.y = 0f;
+                float reach = Mathf.Max(owner.Configuracion.RangoAtaque,
+                    owner.Configuracion.DistanciaMinimaObjetivo) + 0.4f;
+                if (separation.sqrMagnitude <= reach * reach && hitIdentities.Add(hunter))
+                {
+                    hunter.RecibirImpacto(new DamageInfo(owner.DanoActual,
+                        hunter.transform.position, separation, owner.gameObject));
+                }
+            }
+        }
     }
 
     private void OnDisable() => CancelAttack();

@@ -93,6 +93,28 @@ public sealed class MutantAttackHitbox : MonoBehaviour
 
             // Sin fallback generico: el ataque enemigo solo puede golpear al Cazador.
         }
+
+        // El Mutant es escalado para el mapa mundial; esa escala puede dejar
+        // desalineado su collider visual respecto al origen del golpe. Si el
+        // Cazador está junto al Mutant, el golpe debe seguir conectando.
+        if (objetivosGolpeados.Count == 0)
+        {
+            CazadorStats hunter = FindAnyObjectByType<CazadorStats>();
+            if (hunter != null)
+            {
+                Vector3 separation = hunter.transform.position - raizPropietario.position;
+                separation.y = 0f;
+                if (separation.sqrMagnitude <= 16f &&
+                    objetivosGolpeados.Add(hunter))
+                {
+                    hunter.RecibirImpacto(new DamageInfo(
+                        danoActual,
+                        hunter.transform.position,
+                        separation,
+                        raizPropietario.gameObject));
+                }
+            }
+        }
     }
 
     private bool IsOwnedByMutant(Transform candidate)

@@ -205,7 +205,9 @@ public sealed class CazadorController : MonoBehaviour
             ? desiredDirection.normalized
             : Vector3.zero;
 
-        running = input.SprintHeld && state.CanSprint && inputMagnitude > 0.1f;
+        // En el mapa mundial, cualquier movimiento normal usa la velocidad de
+        // carrera para que el Cazador pueda recorrer el escenario ampliado.
+        running = state.CanSprint && inputMagnitude > 0.1f;
         VelocidadMaximaActual = state.IsCrouching
             ? velocidadAgachado
             : running ? velocidadCorrer : velocidadCaminar;

@@ -42,6 +42,10 @@ public sealed class MutantEnemyIntentSource : MonoBehaviour, IMutantIntentSource
     private float attackCooldownTimer;
     private float hurtTimer;
     private bool attackRequested;
+    // El mapa mundial coloca a los enemigos lejos al iniciar. En ese caso el
+    // objetivo se asigna desde la escena y no debe perderse por el rango de
+    // deteccion antes de que el Mutant haya podido acercarse.
+    private bool objetivoAsignadoExternamente;
 
     public MutantEnemyAIState Estado { get; private set; } = MutantEnemyAIState.Idle;
     public Vector2 Move { get; private set; }
@@ -108,7 +112,7 @@ public sealed class MutantEnemyIntentSource : MonoBehaviour, IMutantIntentSource
         Vector3 toTarget = objetivo.transform.position - transform.position;
         toTarget.y = 0f;
         float distance = toTarget.magnitude;
-        if (distance > rangoDeteccion * 1.2f)
+        if (!objetivoAsignadoExternamente && distance > rangoDeteccion * 1.2f)
         {
             objetivo = null;
             Estado = MutantEnemyAIState.Idle;
@@ -150,6 +154,7 @@ public sealed class MutantEnemyIntentSource : MonoBehaviour, IMutantIntentSource
     public void SetTarget(CazadorStats value)
     {
         objetivo = value;
+        objetivoAsignadoExternamente = value != null;
         detectionTimer = intervaloDeteccion;
         if (objetivo != null)
         {

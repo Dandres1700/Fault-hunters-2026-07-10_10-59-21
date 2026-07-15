@@ -142,7 +142,7 @@ public sealed class FallaCore : MonoBehaviour, IRecibeImpacto
         Vector3 toTarget = target.position - transform.position;
         toTarget.y = 0f;
         float distance = toTarget.magnitude;
-        if (distance > configuracion.RangoDeteccion * 1.25f)
+        if (!externallyRevealed && distance > configuracion.RangoDeteccion * 1.25f)
         {
             target = null;
             Estado = FallaState.Inactiva;
@@ -247,19 +247,12 @@ public sealed class FallaCore : MonoBehaviour, IRecibeImpacto
         float radius = Mathf.Max(0.1f, physicalCollider.bounds.extents.x * 0.75f);
         float step = Mathf.Min(configuracion.Velocidad * Time.deltaTime,
             distance - configuracion.DistanciaMinimaObjetivo);
-        bool blocked = Physics.SphereCast(
-            transform.position + Vector3.up * radius,
-            radius,
-            normalized,
-            out _,
-            Mathf.Max(0f, step),
-            capasObstaculo,
-            QueryTriggerInteraction.Ignore
-        );
-
         body.MoveRotation(nextRotation);
-        if (!blocked && step > 0f)
+        if (step > 0f)
         {
+            // Las Fallas usan movimiento directo: en este mapa la malla de la
+            // calle se compone de muchos colliders y el SphereCast las dejaba
+            // bloqueadas aun cuando tenían un camino libre hacia el Cazador.
             body.MovePosition(body.position + normalized * step);
         }
     }
@@ -267,6 +260,7 @@ public sealed class FallaCore : MonoBehaviour, IRecibeImpacto
     public void SetTarget(Transform value, bool forceAlert = true)
     {
         target = value;
+        externallyRevealed = forceAlert && target != null;
         if (target != null && forceAlert && EstaViva)
         {
             Estado = FallaState.Alerta;

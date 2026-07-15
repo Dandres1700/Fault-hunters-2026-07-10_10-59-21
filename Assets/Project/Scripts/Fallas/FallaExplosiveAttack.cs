@@ -21,6 +21,7 @@ public sealed class FallaExplosiveAttack : MonoBehaviour, IFallaAttack
     private Collider[] results;
     private Coroutine routine;
     private FallaCore owner;
+    private Transform target;
 
     public bool IsRunning => routine != null;
 
@@ -38,6 +39,7 @@ public sealed class FallaExplosiveAttack : MonoBehaviour, IFallaAttack
             return;
         }
         owner = attackOwner;
+        this.target = target;
         routine = StartCoroutine(ExplosionRoutine());
     }
 
@@ -115,6 +117,25 @@ public sealed class FallaExplosiveAttack : MonoBehaviour, IFallaAttack
                 direction,
                 owner.gameObject
             ));
+        }
+
+        // Igual que el ataque cuerpo a cuerpo, la explosion debe afectar al
+        // Cazador objetivo aunque su collider se encuentre en un hijo y la
+        // escala del mapa desplace el punto de solapamiento.
+        if (hitIdentities.Count == 0 && target != null && owner != null)
+        {
+            CazadorStats hunter = target.GetComponentInParent<CazadorStats>();
+            if (hunter != null)
+            {
+                Vector3 separation = hunter.transform.position - transform.position;
+                separation.y = 0f;
+                if (separation.sqrMagnitude <= radioExplosion * radioExplosion &&
+                    hitIdentities.Add(hunter))
+                {
+                    hunter.RecibirImpacto(new DamageInfo(owner.DanoActual,
+                        hunter.transform.position, separation, owner.gameObject));
+                }
+            }
         }
     }
 

@@ -38,6 +38,22 @@ public sealed class CazadorInputReader : MonoBehaviour
         CacheActions();
     }
 
+    private void Start()
+    {
+        if (playerMap == null)
+        {
+            CacheActions();
+        }
+        if (playerMap != null && !enabled)
+        {
+            Debug.Log(
+                "CazadorInputReader: re-habilitado en Start() tras fallo previo.",
+                this
+            );
+            enabled = true;
+        }
+    }
+
     private void OnEnable()
     {
         if (playerMap == null)
