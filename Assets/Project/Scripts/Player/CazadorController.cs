@@ -1,187 +1,310 @@
 using UnityEngine;
 
-/// <summary>
-/// Movimiento 3D del Cazador usando CharacterController.
-/// Movimiento relativo a la camara (tipo action-adventure / arena boss fight).
-/// Usa el Input System viejo (Input.GetAxis / Input.GetButtonDown).
-/// </summary>
+[DisallowMultipleComponent]
 [RequireComponent(typeof(CharacterController))]
-public class CazadorController : MonoBehaviour
+[RequireComponent(typeof(CazadorInputReader))]
+[RequireComponent(typeof(CazadorStateController))]
+public sealed class CazadorController : MonoBehaviour
 {
     [Header("Referencias")]
     [SerializeField] private Transform camaraTransform;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private CazadorInputReader input;
+    [SerializeField] private CazadorStateController state;
     [SerializeField] private CazadorStats stats;
-    [SerializeField] private Animator animator;
+    [SerializeField] private CazadorAnimationController animationController;
 
     [Header("Movimiento")]
-    [SerializeField] private float velocidadCaminar = 4.5f;
-    [SerializeField] private float velocidadRotacion = 12f;
+    [SerializeField, Min(0f)] private float velocidadCaminar = 4.5f;
+    [SerializeField, Min(0f)] private float velocidadCorrer = 7.5f;
+    [SerializeField, Min(0f)] private float velocidadAgachado = 2.25f;
+    [SerializeField, Min(0.01f)] private float aceleracion = 18f;
+    [SerializeField, Min(0.01f)] private float desaceleracion = 24f;
+    [SerializeField, Min(0.01f)] private float velocidadRotacion = 14f;
 
-    [Header("Dash / Esquive")]
-    [SerializeField] private float velocidadDash = 14f;
-    [SerializeField] private float duracionDash = 0.22f;
-    [SerializeField] private float costoStaminaDash = 20f;
-    [SerializeField] private float cooldownDash = 0.5f;
-
-    [Header("Gravedad")]
+    [Header("Salto y gravedad")]
+    [SerializeField, Min(0.01f)] private float alturaSalto = 1.4f;
     [SerializeField] private float gravedad = -25f;
-    [SerializeField] private float velocidadCaidaMaxima = -30f;
+    [SerializeField] private float fuerzaPegadoSuelo = -2f;
+    [SerializeField] private float velocidadCaidaMaxima = -35f;
+    [SerializeField] private float umbralCaida = -1.5f;
 
-    private CharacterController controller;
-    private Vector3 velocidadVertical;
-    private Vector3 direccionMovimientoActual;
+    [Header("Suelo")]
+    [SerializeField, Min(0.01f)] private float radioSuelo = 0.24f;
+    [SerializeField] private LayerMask capasSuelo = ~0;
 
-    private bool estaDasheando;
-    private float timerDash;
-    private float timerCooldownDash;
-    private Vector3 direccionDash;
+    [Header("Agacharse")]
+    [SerializeField, Range(0.35f, 0.9f)] private float proporcionAlturaAgachado = 0.6f;
+    [SerializeField, Min(0.01f)] private float velocidadCambioAltura = 8f;
+    [SerializeField] private LayerMask capasObstruccion = ~0;
 
-    public bool PuedeActuar { get; private set; } = true; // combate puede bloquear esto
-    public bool EstaDasheando => estaDasheando;
+    private CharacterController characterController;
+    private float velocidadActual;
+    private float velocidadVertical;
+    private float alturaNormal;
+    private float alturaAgachado;
+    private Vector3 centroNormal;
+    private Vector3 centroAgachado;
+    private Vector3 direccionMundo;
+    private bool running;
+
+    public bool PuedeActuar => state != null && !state.MovementLocked;
+    public bool EstaDasheando => state != null &&
+                                 state.Action == EstadoAccionCazador.Dodging;
+    public float VelocidadActual => velocidadActual;
+    public float VelocidadMaximaActual { get; private set; }
+    public float VelocidadNormalizada => velocidadCorrer > 0.01f
+        ? Mathf.Clamp01(velocidadActual / velocidadCorrer)
+        : 0f;
+    public float VelocidadVertical => velocidadVertical;
+    public Vector3 DireccionMovimientoMundo => direccionMundo;
+    public bool EstaCorriendo => running;
 
     private void Awake()
     {
-        controller = GetComponent<CharacterController>();
+        characterController = GetComponent<CharacterController>();
+        input ??= GetComponent<CazadorInputReader>();
+        state ??= GetComponent<CazadorStateController>();
+        stats ??= GetComponent<CazadorStats>();
+        animationController ??= GetComponent<CazadorAnimationController>();
 
-        if (stats == null) stats = GetComponent<CazadorStats>();
-        if (camaraTransform == null && Camera.main != null) camaraTransform = Camera.main.transform;
+        if (camaraTransform == null && Camera.main != null)
+        {
+            camaraTransform = Camera.main.transform;
+        }
+
+        alturaNormal = characterController.height;
+        centroNormal = characterController.center;
+        alturaAgachado = Mathf.Max(
+            characterController.radius * 2f,
+            alturaNormal * proporcionAlturaAgachado
+        );
+        float bottom = centroNormal.y - alturaNormal * 0.5f;
+        centroAgachado = new Vector3(
+            centroNormal.x,
+            bottom + alturaAgachado * 0.5f,
+            centroNormal.z
+        );
+    }
+
+    private void OnEnable()
+    {
+        if (stats != null)
+        {
+            stats.OnMuerte += OnDeath;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (stats != null)
+        {
+            stats.OnMuerte -= OnDeath;
+        }
     }
 
     private void Update()
     {
-        if (!stats.EstaVivo) return;
-
-        ActualizarTimers();
-
-        if (estaDasheando)
+        if (state == null || input == null || state.IsDead)
         {
-            EjecutarDash();
+            return;
         }
-        else
-        {
-            Vector3 inputMovimiento = LeerInputMovimiento();
-            ManejarInicioDash(inputMovimiento);
 
-            if (PuedeActuar)
+        bool grounded = DetectGround();
+        UpdateGroundState(grounded);
+        HandleCrouch();
+        HandleJump(grounded);
+        UpdateHorizontalMovement();
+        UpdateVerticalMovement(grounded);
+        UpdateControllerHeight();
+
+        Vector3 displacement = direccionMundo * velocidadActual;
+        displacement.y = velocidadVertical;
+        characterController.Move(displacement * Time.deltaTime);
+    }
+
+    private bool DetectGround()
+    {
+        Vector3 checkPosition = groundCheck != null
+            ? groundCheck.position
+            : transform.position + Vector3.up * characterController.skinWidth;
+
+        return characterController.isGrounded || Physics.CheckSphere(
+            checkPosition,
+            radioSuelo,
+            capasSuelo,
+            QueryTriggerInteraction.Ignore
+        );
+    }
+
+    private void UpdateGroundState(bool grounded)
+    {
+        if (grounded && velocidadVertical <= 0f)
+        {
+            bool landed = state.Locomotion == EstadoLocomocionCazador.Falling ||
+                          state.Locomotion == EstadoLocomocionCazador.Jumping;
+            state.SetLocomotion(EstadoLocomocionCazador.Grounded);
+            velocidadVertical = fuerzaPegadoSuelo;
+
+            if (landed)
             {
-                MoverYRotar(inputMovimiento);
+                animationController?.NotifyLanding();
             }
         }
-
-        AplicarGravedad();
-        ActualizarAnimator();
-    }
-
-    private Vector3 LeerInputMovimiento()
-    {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-
-        Vector3 input = new Vector3(horizontal, 0f, vertical);
-        if (input.sqrMagnitude > 1f) input.Normalize();
-
-        return input;
-    }
-
-    private void MoverYRotar(Vector3 inputMovimiento)
-    {
-        Vector3 direccionCamaraForward = camaraTransform.forward;
-        Vector3 direccionCamaraRight = camaraTransform.right;
-        direccionCamaraForward.y = 0f;
-        direccionCamaraRight.y = 0f;
-        direccionCamaraForward.Normalize();
-        direccionCamaraRight.Normalize();
-
-        Vector3 direccionMundo = direccionCamaraForward * inputMovimiento.z + direccionCamaraRight * inputMovimiento.x;
-        direccionMovimientoActual = direccionMundo;
-
-        Vector3 movimientoHorizontal = direccionMundo * velocidadCaminar;
-        controller.Move(movimientoHorizontal * Time.deltaTime);
-
-        if (direccionMundo.sqrMagnitude > 0.001f)
+        else if (!grounded && velocidadVertical <= umbralCaida)
         {
-            Quaternion rotacionObjetivo = Quaternion.LookRotation(direccionMundo, Vector3.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, velocidadRotacion * Time.deltaTime);
+            state.SetLocomotion(EstadoLocomocionCazador.Falling);
         }
     }
 
-    private void ManejarInicioDash(Vector3 inputMovimiento)
+    private void HandleJump(bool grounded)
     {
-        bool botonDashPresionado = Input.GetButtonDown("Fire2"); // ajustar segun tu Input Manager (ej. bumper del PS4)
+        if (!input.ConsumeJump() || !grounded || !state.CanJump)
+        {
+            return;
+        }
 
-        if (!botonDashPresionado) return;
-        if (timerCooldownDash > 0f) return;
-        if (!PuedeActuar) return;
-        if (!stats.IntentarGastarStamina(costoStaminaDash)) return;
-
-        Vector3 direccion = inputMovimiento.sqrMagnitude > 0.01f
-            ? TransformarInputADireccionMundo(inputMovimiento)
-            : transform.forward;
-
-        direccionDash = direccion.normalized;
-        estaDasheando = true;
-        timerDash = duracionDash;
+        velocidadVertical = Mathf.Sqrt(alturaSalto * -2f * gravedad);
+        state.SetLocomotion(EstadoLocomocionCazador.Jumping);
+        animationController?.NotifyJump();
     }
 
-    private Vector3 TransformarInputADireccionMundo(Vector3 inputMovimiento)
+    private void HandleCrouch()
     {
-        Vector3 forward = camaraTransform.forward;
-        Vector3 right = camaraTransform.right;
+        if (!input.ConsumeCrouch() || !state.CanToggleCrouch)
+        {
+            return;
+        }
+
+        if (state.IsCrouching)
+        {
+            if (HasStandingClearance())
+            {
+                state.TrySetCrouching(false);
+            }
+
+            return;
+        }
+
+        state.TrySetCrouching(true);
+    }
+
+    private void UpdateHorizontalMovement()
+    {
+        Vector2 moveInput = Vector2.ClampMagnitude(input.Move, 1f);
+        Vector3 forward = camaraTransform != null ? camaraTransform.forward : Vector3.forward;
+        Vector3 right = camaraTransform != null ? camaraTransform.right : Vector3.right;
         forward.y = 0f;
         right.y = 0f;
         forward.Normalize();
         right.Normalize();
 
-        return forward * inputMovimiento.z + right * inputMovimiento.x;
-    }
+        Vector3 desiredDirection = forward * moveInput.y + right * moveInput.x;
+        float inputMagnitude = Mathf.Clamp01(moveInput.magnitude);
+        direccionMundo = desiredDirection.sqrMagnitude > 0.0001f
+            ? desiredDirection.normalized
+            : Vector3.zero;
 
-    private void EjecutarDash()
-    {
-        controller.Move(direccionDash * velocidadDash * Time.deltaTime);
-        timerDash -= Time.deltaTime;
+        running = input.SprintHeld && state.CanSprint && inputMagnitude > 0.1f;
+        VelocidadMaximaActual = state.IsCrouching
+            ? velocidadAgachado
+            : running ? velocidadCorrer : velocidadCaminar;
 
-        if (timerDash <= 0f)
+        float targetSpeed = state.MovementLocked
+            ? 0f
+            : VelocidadMaximaActual * inputMagnitude;
+        float rate = targetSpeed > velocidadActual ? aceleracion : desaceleracion;
+        velocidadActual = Mathf.MoveTowards(
+            velocidadActual,
+            targetSpeed,
+            rate * Time.deltaTime
+        );
+
+        if (!state.MovementLocked && direccionMundo.sqrMagnitude > 0.0001f)
         {
-            estaDasheando = false;
-            timerCooldownDash = cooldownDash;
+            Quaternion targetRotation = Quaternion.LookRotation(direccionMundo, Vector3.up);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                1f - Mathf.Exp(-velocidadRotacion * Time.deltaTime)
+            );
         }
     }
 
-    private void ActualizarTimers()
+    private void UpdateVerticalMovement(bool grounded)
     {
-        if (timerCooldownDash > 0f)
+        if (grounded && velocidadVertical < 0f)
         {
-            timerCooldownDash -= Time.deltaTime;
+            velocidadVertical = fuerzaPegadoSuelo;
+            return;
+        }
+
+        velocidadVertical += gravedad * Time.deltaTime;
+        velocidadVertical = Mathf.Max(velocidadVertical, velocidadCaidaMaxima);
+    }
+
+    private void UpdateControllerHeight()
+    {
+        float targetHeight = state.IsCrouching ? alturaAgachado : alturaNormal;
+        Vector3 targetCenter = state.IsCrouching ? centroAgachado : centroNormal;
+        float step = velocidadCambioAltura * Time.deltaTime;
+
+        characterController.height = Mathf.MoveTowards(
+            characterController.height,
+            targetHeight,
+            step
+        );
+        characterController.center = Vector3.MoveTowards(
+            characterController.center,
+            targetCenter,
+            step
+        );
+    }
+
+    private bool HasStandingClearance()
+    {
+        float radius = characterController.radius * 0.95f;
+        Vector3 currentTop = transform.TransformPoint(
+            characterController.center + Vector3.up *
+            (characterController.height * 0.5f - radius)
+        );
+        Vector3 standingTop = transform.TransformPoint(
+            centroNormal + Vector3.up * (alturaNormal * 0.5f - radius)
+        );
+
+        return !Physics.CheckCapsule(
+            currentTop,
+            standingTop,
+            radius,
+            capasObstruccion,
+            QueryTriggerInteraction.Ignore
+        );
+    }
+
+    private void OnDeath()
+    {
+        state?.SetDead();
+        velocidadActual = 0f;
+    }
+
+    public void SetPuedeActuar(bool value)
+    {
+        if (value)
+        {
+            state?.EndAttack();
+        }
+        else
+        {
+            state?.TryBeginAttack(true);
         }
     }
 
-    private void AplicarGravedad()
+    private void OnDrawGizmosSelected()
     {
-        if (controller.isGrounded && velocidadVertical.y < 0f)
-        {
-            velocidadVertical.y = -2f; // pequeno valor negativo para mantenerlo "pegado" al piso
-        }
-
-        velocidadVertical.y += gravedad * Time.deltaTime;
-        velocidadVertical.y = Mathf.Max(velocidadVertical.y, velocidadCaidaMaxima);
-
-        controller.Move(velocidadVertical * Time.deltaTime);
-    }
-
-    private void ActualizarAnimator()
-    {
-        if (animator == null) return;
-
-        float velocidadNormalizada = new Vector2(direccionMovimientoActual.x, direccionMovimientoActual.z).magnitude;
-        animator.SetFloat("Velocidad", velocidadNormalizada);
-        animator.SetBool("Dasheando", estaDasheando);
-    }
-
-    /// <summary>
-    /// Usado por CazadorCombat para bloquear movimiento durante ataques.
-    /// </summary>
-    public void SetPuedeActuar(bool valor)
-    {
-        PuedeActuar = valor;
+        Gizmos.color = Color.green;
+        Vector3 position = groundCheck != null
+            ? groundCheck.position
+            : transform.position + Vector3.up * 0.05f;
+        Gizmos.DrawWireSphere(position, radioSuelo);
     }
 }

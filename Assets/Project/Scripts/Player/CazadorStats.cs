@@ -6,7 +6,7 @@ using UnityEngine;
 /// Otros sistemas (UI, combate, controller) se suscriben a los eventos
 /// en lugar de leer los valores directamente cada frame.
 /// </summary>
-public class CazadorStats : MonoBehaviour
+public class CazadorStats : MonoBehaviour, IRecibeDano
 {
     [Header("Vida")]
     [SerializeField] private float vidaMaxima = 100f;
