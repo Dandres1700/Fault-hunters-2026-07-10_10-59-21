@@ -75,8 +75,7 @@ public sealed class MutantAttackHitbox : MonoBehaviour
                 continue;
             }
 
-            IRecibeImpacto impactReceiver = candidate.GetComponentInParent<IRecibeImpacto>();
-            if (impactReceiver != null)
+            if (CombatTargeting.TryGetCazador(candidate, out IRecibeImpacto impactReceiver))
             {
                 UnityEngine.Object identity = impactReceiver.IdentidadImpacto;
                 if (identity == null || !objetivosGolpeados.Add(identity))
@@ -92,13 +91,7 @@ public sealed class MutantAttackHitbox : MonoBehaviour
                 continue;
             }
 
-            IRecibeDano damageable = candidate.GetComponentInParent<IRecibeDano>();
-            UnityEngine.Object fallbackIdentity = damageable as UnityEngine.Object;
-            if (damageable != null && fallbackIdentity != null &&
-                objetivosGolpeados.Add(fallbackIdentity))
-            {
-                damageable.RecibirDano(danoActual);
-            }
+            // Sin fallback generico: el ataque enemigo solo puede golpear al Cazador.
         }
     }
 

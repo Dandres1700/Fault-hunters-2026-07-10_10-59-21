@@ -1,0 +1,23 @@
+{
+    "timestamp": "2026-07-15T11:47:34.4753951-05:00",
+    "completed": true,
+    "loadedFromMenu": true,
+    "cazadorMoved": true,
+    "cazadorAttacked": true,
+    "mutantMoved": true,
+    "mutantAttackedCazador": true,
+    "crawlerAttackedCazador": true,
+    "explosiveAttackedCazador": true,
+    "mutantSummonedRobots": true,
+    "robotsTargetOnlyCazador": true,
+    "damageIndependent": true,
+    "deathIndependent": true,
+    "uniqueActorsAndSystems": true,
+    "noPurpleVisuals": true,
+    "noMissingReferences": true,
+    "initialMutantDistance": 35.738914489746097,
+    "minimumMutantDistance": 21.609968185424806,
+    "initialRobotCount": 3,
+    "maximumRobotCount": 4,
+    "notes": []
+}

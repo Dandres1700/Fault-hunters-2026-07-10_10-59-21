@@ -11,9 +11,9 @@ public static class ConfigurarMapa1Tool
     private const string ModelPath = "Assets/Project/Models/Map1/ciudad_abandonada.glb";
     private const string MaterialPath = "Assets/Project/Art/Materials/Mapa1_PisoNocturno.mat";
     private const string EnvironmentName = "EntornoMapa1";
-    private const float TargetMapSize = 220f;
+    private const float TargetMapSize = 250f;
 
-    [MenuItem("Fault Hunters/Configurar Mapa 1 nocturno")]
+    [MenuItem("Fault Hunters/Configurar Mapa 1 nocturno %#2")]
     public static void ConfigurarDesdeMenu()
     {
         ConfigurarMapa(true);
@@ -48,21 +48,26 @@ public static class ConfigurarMapa1Tool
 
         GameObject city = FindCity(scene);
         PrepareCity(city);
-        Bounds bounds = CalculateBounds(city);
+        Bounds cityBounds = CalculateBounds(city);
+        Transform playableObject = FindChildRecursive(city.transform, "Object_2");
+        Bounds bounds = playableObject != null
+            ? CalculateBounds(playableObject.gameObject)
+            : cityBounds;
 
         GameObject environment = new GameObject(EnvironmentName);
         SceneManager.MoveGameObjectToScene(environment, scene);
 
         CreateFloor(environment.transform, bounds);
         CreateLimits(environment.transform, bounds);
-        ConfigureNight(scene, bounds);
+        ConfigureNight(scene, cityBounds);
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
 
         Debug.Log(
-            $"Mapa 1 configurado. Area jugable: {bounds.size.x:F1} x {bounds.size.z:F1} metros."
+            $"Mapa 1 configurado a {TargetMapSize:F0} m. Limites de Object_2: " +
+            $"{bounds.size.x:F1} x {bounds.size.z:F1} metros."
         );
 
         if (openedByTool)
@@ -247,21 +252,31 @@ public static class ConfigurarMapa1Tool
 
         if (material != null)
         {
+            ConfigureGroundMaterial(material);
             return material;
         }
 
         Shader shader = Shader.Find("Universal Render Pipeline/Lit");
         material = new Material(shader != null ? shader : Shader.Find("Standard"));
         material.name = "Mapa1_PisoNocturno";
-        material.color = new Color(0.035f, 0.045f, 0.055f, 1f);
-
-        if (material.HasProperty("_Smoothness"))
-        {
-            material.SetFloat("_Smoothness", 0.08f);
-        }
+        ConfigureGroundMaterial(material);
 
         AssetDatabase.CreateAsset(material, MaterialPath);
         return material;
+    }
+
+    private static void ConfigureGroundMaterial(Material material)
+    {
+        material.color = new Color(0.11f, 0.13f, 0.17f, 1f);
+        if (material.HasProperty("_BaseColor"))
+        {
+            material.SetColor("_BaseColor", material.color);
+        }
+        if (material.HasProperty("_Smoothness"))
+        {
+            material.SetFloat("_Smoothness", 0.16f);
+        }
+        EditorUtility.SetDirty(material);
     }
 
     private static void ConfigureNight(Scene scene, Bounds bounds)
@@ -269,14 +284,14 @@ public static class ConfigurarMapa1Tool
         RenderSettings.skybox = null;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
-        RenderSettings.fogColor = new Color(0.012f, 0.02f, 0.045f, 1f);
-        RenderSettings.fogDensity = 0.0065f;
+        RenderSettings.fogColor = new Color(0.055f, 0.075f, 0.12f, 1f);
+        RenderSettings.fogDensity = 0.0028f;
         RenderSettings.ambientMode = AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor = new Color(0.025f, 0.04f, 0.085f, 1f);
-        RenderSettings.ambientEquatorColor = new Color(0.018f, 0.025f, 0.05f, 1f);
-        RenderSettings.ambientGroundColor = new Color(0.008f, 0.012f, 0.02f, 1f);
-        RenderSettings.ambientIntensity = 0.55f;
-        RenderSettings.reflectionIntensity = 0.25f;
+        RenderSettings.ambientSkyColor = new Color(0.16f, 0.22f, 0.38f, 1f);
+        RenderSettings.ambientEquatorColor = new Color(0.12f, 0.16f, 0.25f, 1f);
+        RenderSettings.ambientGroundColor = new Color(0.055f, 0.07f, 0.11f, 1f);
+        RenderSettings.ambientIntensity = 1.15f;
+        RenderSettings.reflectionIntensity = 0.55f;
 
         Light moon = null;
 
@@ -301,11 +316,24 @@ public static class ConfigurarMapa1Tool
 
         moon.gameObject.name = "Luz Lunar";
         moon.color = new Color(0.32f, 0.48f, 0.78f, 1f);
-        moon.intensity = 0.32f;
+        moon.intensity = 1.05f;
         moon.shadows = LightShadows.Soft;
         moon.shadowStrength = 0.85f;
         moon.transform.rotation = Quaternion.Euler(38f, -32f, 0f);
         RenderSettings.sun = moon;
+
+        GameObject fillObject = FindRoot(scene, "Luz_Relleno_Mapa1");
+        if (fillObject == null)
+        {
+            fillObject = new GameObject("Luz_Relleno_Mapa1");
+            SceneManager.MoveGameObjectToScene(fillObject, scene);
+        }
+        Light fill = fillObject.GetComponent<Light>() ?? fillObject.AddComponent<Light>();
+        fill.type = LightType.Directional;
+        fill.color = new Color(0.55f, 0.68f, 1f, 1f);
+        fill.intensity = 0.42f;
+        fill.shadows = LightShadows.None;
+        fill.transform.rotation = Quaternion.Euler(52f, 145f, 0f);
 
         Camera camera = Camera.main;
 
@@ -330,6 +358,18 @@ public static class ConfigurarMapa1Tool
             }
         }
 
+        return null;
+    }
+
+    private static Transform FindChildRecursive(Transform root, string name)
+    {
+        foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+        {
+            if (string.Equals(child.name, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return child;
+            }
+        }
         return null;
     }
 }

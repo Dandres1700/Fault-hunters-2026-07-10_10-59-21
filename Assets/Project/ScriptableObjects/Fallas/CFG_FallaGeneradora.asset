@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f1ecd16586be274282bda2b0c3351af, type: 3}
+  m_Name: CFG_FallaGeneradora
+  m_EditorClassIdentifier: Assembly-CSharp::FallaConfiguration
+  tipo: 2
+  vidaMaxima: 120
+  invulnerabilidadTrasImpacto: 0.08
+  tiempoDesaparicion: 0.65
+  desactivarAlMorir: 1
+  rangoDeteccion: 12
+  intervaloDeteccion: 0.2
+  velocidad: 0
+  velocidadRotacion: 9
+  distanciaMinimaObjetivo: 1.15
+  dano: 0
+  rangoAtaque: 0.2
+  preparacionAtaque: 0.5
+  cooldownAtaque: 2
+  visibilidadNucleo: 0
+  velocidadPulsacion: 2.4
+  intensidadPulsacion: 0.12
+  intensidadDeformacion: 0.18
