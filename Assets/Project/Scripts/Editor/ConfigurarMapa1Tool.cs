@@ -13,7 +13,7 @@ public static class ConfigurarMapa1Tool
     private const string EnvironmentName = "EntornoMapa1";
     private const float TargetMapSize = 250f;
 
-    [MenuItem("Fault Hunters/Configurar Mapa 1 nocturno %#2")]
+    [MenuItem("Fault Hunters/Configurar Mapa 1 nocturno %#y")]
     public static void ConfigurarDesdeMenu()
     {
         ConfigurarMapa(true);
@@ -369,7 +369,11 @@ public static class ConfigurarMapa1Tool
             fillObject = new GameObject("Luz_Relleno_Mapa1");
             SceneManager.MoveGameObjectToScene(fillObject, scene);
         }
-        Light fill = fillObject.GetComponent<Light>() ?? fillObject.AddComponent<Light>();
+        Light fill = fillObject.GetComponent<Light>();
+        if (fill == null)
+        {
+            fill = fillObject.AddComponent<Light>();
+        }
         fill.type = LightType.Directional;
         fill.color = new Color(0.55f, 0.68f, 1f, 1f);
         fill.intensity = 0.42f;
