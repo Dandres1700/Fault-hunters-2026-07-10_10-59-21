@@ -203,9 +203,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1085420873}
-        m_TargetAssemblyTypeName: MenuPrincipalController, Assembly-CSharp
-        m_MethodName: Continuar
+      - m_Target: {fileID: 1085420875}
+        m_TargetAssemblyTypeName: FlujoEscenas, Assembly-CSharp
+        m_MethodName: ContinuarPartida
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -378,9 +378,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 56978069}
-        m_TargetAssemblyTypeName: CargarEscenaBoton, Assembly-CSharp
-        m_MethodName: CargarEscena
+      - m_Target: {fileID: 1085420875}
+        m_TargetAssemblyTypeName: FlujoEscenas, Assembly-CSharp
+        m_MethodName: AbrirOpciones
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1387,6 +1387,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1085420874}
   - component: {fileID: 1085420873}
+  - component: {fileID: 1085420875}
   m_Layer: 0
   m_Name: MenuManager
   m_TagString: Untagged
@@ -1411,6 +1412,18 @@ MonoBehaviour:
   escenaSeleccionarMision: MapaMundial
   escenaArchivosFalla: 
   escenaOpciones: 
+--- !u!114 &1085420875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1085420872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d20e99c36b74a6f9ff9d803a83c6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FlujoEscenas
 --- !u!4 &1085420874
 Transform:
   m_ObjectHideFlags: 0
@@ -2016,9 +2029,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1085420873}
-        m_TargetAssemblyTypeName: MenuPrincipalController, Assembly-CSharp
-        m_MethodName: SeleccionarMision
+      - m_Target: {fileID: 1085420875}
+        m_TargetAssemblyTypeName: FlujoEscenas, Assembly-CSharp
+        m_MethodName: VolverAlMapa
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2175,8 +2188,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1085420873}
-        m_TargetAssemblyTypeName: MenuPrincipalController, Assembly-CSharp
+      - m_Target: {fileID: 1085420875}
+        m_TargetAssemblyTypeName: FlujoEscenas, Assembly-CSharp
         m_MethodName: NuevaPartida
         m_Mode: 1
         m_Arguments:
